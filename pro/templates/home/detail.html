@@ -1,0 +1,66 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+    {% comment %} مربوط به جلسه ی ۲۱ هست که میگه اگر آیدی یوزری که لاگین کرده با آیدی یوزر پست یکی بود بیاد دیلیت و آپدیت رو نشون طرف بده ولی اگه برابر نبود نشون نده چون اون یوزر، پست رو ننوشته و آیدیش متفاوته {% endcomment %}
+    {% if request.user.id == post.user.id %}
+        <a href="{% url 'home:post_delete' post.id %}" class="btn btn-danger mb-3" href="">DELETE</a>
+        <a href="{% url 'home:post_update' post.id %}" class="btn btn-primary mb-3" href="">UPDATE</a>
+    {% endif %}
+    <h3>Detail</h3><br>
+    <h4 class="mb-2">{{ post.title }}</h4>
+    <div class="card p-3 lead text-dark bg-warning">
+        <p><a style="color:black" href="{% url 'account:user_profile' post.user.id %}">{{ post.user.username }}</a> - {{ post.created|date:"Y_M_D" }}</p>
+        <p class="card-body">{{ post.body|linebreaks }}</p>
+    </div><br>
+
+    {% comment %} مربوط به جلسه ی ۳۷ هستش که میاد شرط میذاره هرکس که لاگین کرده فقط بتونه کامنت بذاره {% endcomment %}
+    {% if request.user.is_authenticated %}
+        {% comment %} مربوط به جلسه ی ۴۰ که میاد لایک رو میگذاره دکمه شو {% endcomment %}
+        {% comment %} نکته: با توجه به متدی که در مدل نوشتم و در ویو شرطش رو گذاشتم اگر کاربر لایک کنه پست رو دیسیبل میشه دکمه ی لایک که در کلاس زیر دیسیبل بین کن لایک قرار گرفته که وریبل ما در ویو بوده {% endcomment %}
+        <a href="{% url 'home:post_like' post.id %}" class="{% if can_like %}disabled{% endif %} mb-2 btn btn-primary col-md-2">Like:{{ post.like_count}}</a>
+        <form action="" method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input class="btn btn-success" type="submit" value="Send">
+        </form>
+    {% else %}
+        <p class='alert alert-danger'>Only Logged In Users Can Comment!</p>
+    {% endif %}<br>
+
+    {% if request.user.is_authenticated %}
+        {% comment %} مربوط به جلسه ی ۳۵ هستش که میایم کامنت گذاشتن رو به کاربر نشون میدیم {% endcomment %}
+        <h4 class='badge col-md-2' style='background-color:blue; color:white; font-size:19px'>Comments: {{ comments.count }}</h4>
+        {% for comment in comments %}
+            <div class="card mt-3 bg-dark text-white">
+                <p class="card-header">
+                    {{ comment.user }} | {{ comment.created|timesince }} {% comment %} فیلتر تایم سینس نشون میده چند دقیقه یا ساعت یا روز قبل این کامنت نوشته شده {% endcomment %}
+                </p>
+                <p class="card-body">
+                    {{ comment.body }}
+                    {% comment %} این مربوط میشه به جلسه ی ۳۹ که میادپاسخ به کامنتها رو برای کاربرانی که برای پستشون کامنت اومده رو مشخص میکنه فرمش رو که از اون طریق جواب بدن به کامنتها {% endcomment %}
+                    {% if request.user.is_authenticated %}
+                        <form action="{% url 'home:add_reply' post.id comment.id %}" method="post">
+                            {% csrf_token %}
+                            <details class="p-3 text" style="color:white">
+                                <summary>Reply</summary><br>
+                                    {{ reply_form.as_p }}
+                                <input class='btn btn-success' type="submit" value="Send">
+                            </details>
+                            {% comment %} یک ویوی جدید لازم دارم اضافه کردن ریپلای کامنت و یوآرال هم داره {% endcomment %}
+                        </form>
+                    {% endif %}
+                    {% comment %} مربوط به جلسه ی ۳۸ که پاسخ به کامنت رو میومدیم نشون میدادیم از این طریق {% endcomment %}
+                    {% with replies=comment.rcomments.all %}
+                        {% for reply in replies %}
+                            <p class='p-3 m-2 bg-primary text-white'>{{ reply.user }}:<br/>{{ reply.body }}</p>
+                        {% endfor %}
+                    {% endwith %}
+                </p>
+            </div>
+        {% empty %}
+            <p class="alert alert-danger">There is no comment here!</p>
+        {% endfor %}
+    {% else %}
+            <p class="alert alert-warning">You must login for see comments!</p>
+    {% endif %}
+{% endblock %}

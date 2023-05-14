@@ -1,0 +1,10 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+    <h3>Create A New Post</h3><br>
+    <form action="" method="post" novalidate>
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input class="btn btn-info" type="submit" value="Create">
+    </form>
+{% endblock %}

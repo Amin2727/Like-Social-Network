@@ -1,0 +1,17 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+    {% comment %} مربوط به جلسه ی ۴۱ هست که میایم فرم سرچ که ساخته بودیم رو اینجا نشونش میدیم {% endcomment %}
+    <form action="" method='get'>
+        {{ form }}
+        <input type="submit" class='btn btn-success col-md-1' style='border-radius:7px' value='Search'>
+    </form>
+    <h3 class='mt-4'>Posts</h3><br>
+    <div class="card">
+        {% for post in posts%}
+            <a href="{{ post.get_absolute_url }}" class="card-body" style="text-decoration:none;background-color:#61C6E8; color:black">{{ post.body|truncatewords:10 }}</a>
+        {% empty %}
+            <p class='alert alert-danger'>There is no any post here!</p>
+        {% endfor %}
+    </div>
+{% endblock %}
